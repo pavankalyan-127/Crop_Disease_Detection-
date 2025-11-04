@@ -9,6 +9,9 @@ from PIL import Image
 # CONFIGURATION
 # ============================================================
 MODEL_PATH = r"C:\Users\pavan\Downloads\cropDetection_cnn\crop_disease_app\mobile_corn_model.h5"  # trained MobileNet model path
+import os
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model.h5")
+
 IMG_SIZE = (128, 128)
 CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']  # Update with your classes
 
@@ -103,3 +106,4 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
