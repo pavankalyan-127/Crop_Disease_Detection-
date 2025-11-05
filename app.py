@@ -46,14 +46,17 @@ def predict_disease(frame):
 
 # USER INPUT SELECTION
 
-option = st.radio("📸 Select Input Type:", 
-                  ["Capture from Camera", "Upload Image", "Upload Video (MP4)"])
+option = st.radio(
+    "📸 Select Input Type:",
+    ["Capture from Camera", "Upload Image", "Upload Video (MP4)"]
+)
 
 # 1. CAMERA INPUT
 
 if option == "Capture from Camera":
     st.info("Use your mobile or webcam to capture an image.")
-    img_file = st.camera_input("Take a photo")
+    img_file = st.camera_input("Take a photo", key="camera_input_1")
+ 
 
     if img_file is not None:
         try:
@@ -155,6 +158,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
