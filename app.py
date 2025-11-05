@@ -1,38 +1,34 @@
 import streamlit as st
+import os
+import tensorflow as tf
 import numpy as np
 import cv2
-from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
-MODEL_PATH = r"C:\Users\pavan\Downloads\cropDetection_cnn\crop_disease_app\mobile_corn_model.h5"  # trained MobileNet model path
+# must be before any other Streamlit command
+st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
 
-import os
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model.h5")  # ✅ correct relative path
-IMG_SIZE = (128, 128)
-CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']  # Update with your classes
-
-# Load Model
+# now define everything else below
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model.h5")
 @st.cache_resource
 def load_cnn_model():
-    model = load_model(MODEL_PATH)
+    model = tf.keras.models.load_model(MODEL_PATH)
     return model
 
 model = load_cnn_model()
 
-# ============================================================
-# STREAMLIT PAGE SETTINGS
-# ============================================================
+st.title("🌱 Crop Disease Detection (Mobile + Camera Ready)")
+
+
+ # STREAMLIT PAGE SETTINGS
+
 st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
 st.title("🌱 Crop Disease Detection (Mobile + Camera Ready)")
 st.write("Upload or capture a crop leaf image (or video) to detect disease using MobileNetV2 model.")
 
-# ============================================================
 # PREDICTION FUNCTION
-# ============================================================
+
 def predict_disease(frame):
     img = cv2.resize(frame, IMG_SIZE)
     img = img_to_array(img) / 255.0
@@ -42,15 +38,13 @@ def predict_disease(frame):
     conf = np.max(preds)
     return label, conf
 
-# ============================================================
 # USER INPUT SELECTION
-# ============================================================
+
 option = st.radio("📸 Select Input Type:", 
                   ["Capture from Camera", "Upload Image", "Upload Video (MP4)"])
 
-# ============================================================
-# 1️⃣ CAMERA INPUT
-# ============================================================
+# 1. CAMERA INPUT
+
 if option == "Capture from Camera":
     st.info("Use your mobile or webcam to capture an image.")
     img_file = st.camera_input("Take a photo")
@@ -62,9 +56,7 @@ if option == "Capture from Camera":
         label, conf = predict_disease(frame)
         st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
 
-# ============================================================
-# 2️⃣ IMAGE UPLOAD
-# ============================================================
+# 2. IMAGE UPLOAD
 elif option == "Upload Image":
     uploaded = st.file_uploader("Upload leaf image...", type=["jpg", "jpeg", "png"])
     if uploaded:
@@ -74,9 +66,8 @@ elif option == "Upload Image":
         label, conf = predict_disease(frame)
         st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
 
-# ============================================================
-# 3️⃣ VIDEO UPLOAD
-# ============================================================
+# 3. VIDEO UPLOAD
+
 elif option == "Upload Video (MP4)":
     video_file = st.file_uploader("Upload a short video", type=["mp4", "avi", "mov"])
     if video_file:
@@ -99,10 +90,10 @@ elif option == "Upload Video (MP4)":
         cap.release()
         st.success("✅ Video processing complete!")
 
-# ============================================================
 # FOOTER
-# ============================================================
+
 st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
