@@ -2,7 +2,6 @@
 import streamlit as st
 st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
 
-import streamlit as st
 import os
 import tensorflow as tf
 import numpy as np
@@ -98,6 +97,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
