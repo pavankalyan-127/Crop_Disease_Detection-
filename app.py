@@ -17,7 +17,7 @@ from PIL import Image
 # ============================================================
 # 🧠 LOAD MODEL (NO STREAMLIT DECORATORS ABOVE CONFIG)
 # ============================================================
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model.h5")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab1.h5")
 
 def load_cnn_model():
     """Loads the trained CNN model."""
@@ -38,7 +38,7 @@ st.write("Upload or capture an image to identify crop diseases using MobileNetV2
 # ============================================================
 
 # Must match your model’s training image size
-IMG_SIZE = (128, 128)
+IMG_SIZE = (224, 224)
 
 # Update class names to exactly match your dataset folders
 CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']
@@ -187,6 +187,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
