@@ -7,6 +7,8 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
 
 # must be before any other Streamlit command
+
+import streamlit as st
 st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
 
 # now define everything else below
@@ -96,4 +98,5 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
