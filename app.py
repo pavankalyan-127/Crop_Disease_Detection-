@@ -37,7 +37,7 @@ st.write("Upload or capture an image to identify crop diseases using MobileNetV2
 # 🔮 PREDICTION FUNCTION (Fixed for Colab-trained model)
 # ============================================================
 
-IMG_SIZE = (224, 224)
+IMG_SIZE = (124, 124)
 CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']  # update as per your dataset
 
 def predict_disease(frame):
@@ -187,6 +187,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
