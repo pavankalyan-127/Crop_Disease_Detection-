@@ -1,7 +1,12 @@
-
+# ============================================================
+#  STREAMLIT CONFIG - MUST BE FIRST
+# ============================================================
 import streamlit as st
 st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
 
+# ============================================================
+#  LIBRARY IMPORTS
+# ============================================================
 import os
 import tensorflow as tf
 import numpy as np
@@ -9,24 +14,24 @@ import cv2
 from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
 
-
-# now define everything else below
+# ============================================================
+# 🧠 LOAD MODEL (NO STREAMLIT DECORATORS ABOVE CONFIG)
+# ============================================================
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model.h5")
-@st.cache_resource
+
 def load_cnn_model():
+    """Loads the trained CNN model."""
     model = tf.keras.models.load_model(MODEL_PATH)
     return model
 
-model = load_cnn_model()
+#  use Streamlit’s caching *after* config has been set
+model = st.cache_resource(load_cnn_model)()
 
-st.title("🌱 Crop Disease Detection (Mobile + Camera Ready)")
-
-
- # STREAMLIT PAGE SETTINGS
-
-st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
-st.title("🌱 Crop Disease Detection (Mobile + Camera Ready)")
-st.write("Upload or capture a crop leaf image (or video) to detect disease using MobileNetV2 model.")
+# ============================================================
+#  STREAMLIT UI START
+# ============================================================
+st.title(" Crop Disease Detection (Mobile + Camera Ready)")
+st.write("Upload or capture an image to identify crop diseases using MobileNetV2 model.")
 
 # PREDICTION FUNCTION
 
@@ -97,6 +102,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
