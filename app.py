@@ -33,16 +33,38 @@ model = st.cache_resource(load_cnn_model)()
 st.title(" 🌾Crop Disease Detection (Mobile + Camera Ready)")
 st.write("Upload or capture an image to identify crop diseases using MobileNetV2 model.")
 
-# PREDICTION FUNCTION
+# ============================================================
+# 🔮 PREDICTION FUNCTION + GLOBAL CONFIG
+# ============================================================
+
+# Must match your model’s training image size
+IMG_SIZE = (180, 180)
+
+# Update class names to exactly match your dataset folders
+CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']
 
 def predict_disease(frame):
-    img = cv2.resize(frame, IMG_SIZE)
-    img = img_to_array(img) / 255.0
-    img = np.expand_dims(img, axis=0)
-    preds = model.predict(img)
-    label = CLASS_NAMES[np.argmax(preds)]
-    conf = np.max(preds)
-    return label, conf
+    """
+    Takes an OpenCV frame or image array and returns predicted class and confidence.
+    """
+    try:
+        # Resize and normalize image
+        img = cv2.resize(frame, IMG_SIZE)
+        img = img_to_array(img) / 255.0
+        img = np.expand_dims(img, axis=0)
+
+        # Make prediction
+        preds = model.predict(img)
+        label_index = np.argmax(preds)
+        label = CLASS_NAMES[label_index]
+        conf = float(np.max(preds))
+
+        return label, conf
+
+    except Exception as e:
+        # Handle any unexpected issues (wrong image shape, etc.)
+        st.error(f"⚠️ Prediction error: {e}")
+        return "Unknown", 0.0
 
 # USER INPUT SELECTION
 
@@ -165,6 +187,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
