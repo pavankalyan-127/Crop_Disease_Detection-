@@ -55,46 +55,99 @@ if option == "Capture from Camera":
     st.info("Use your mobile or webcam to capture an image.")
     img_file = st.camera_input("Take a photo")
 
-    if img_file:
-        img = Image.open(img_file)
-        st.image(img, caption="Captured Leaf", use_container_width=True)
-        frame = np.array(img)
-        label, conf = predict_disease(frame)
-        st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
+    if img_file is not None:
+        try:
+            image = Image.open(img_file).convert("RGB")
+            st.image(image, caption="Captured Leaf", use_container_width=True)
+            frame = np.array(image)
+
+            label, conf = predict_disease(frame)
+            st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
+
+        except Exception as e:
+            st.error(f"❌ Error processing captured image: {e}")
+
 
 # 2. IMAGE UPLOAD
-elif option == "Upload Image":
-    uploaded = st.file_uploader("Upload leaf image...", type=["jpg", "jpeg", "png"])
-    if uploaded:
-        image = Image.open(uploaded)
-        st.image(image, caption="Uploaded Leaf", use_container_width=True)
-        frame = np.array(image)
-        label, conf = predict_disease(frame)
-        st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
+
+if option == "Capture from Camera":
+    st.info("Use your mobile or webcam to capture an image.")
+    img_file = st.camera_input("Take a photo")
+
+    if img_file is not None:
+        try:
+            image = Image.open(img_file).convert("RGB")
+            st.image(image, caption="Captured Leaf", use_container_width=True)
+            frame = np.array(image)
+
+            label, conf = predict_disease(frame)
+            st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
+
+        except Exception as e:
+            st.error(f"❌ Error processing captured image: {e}")
+
 
 # 3. VIDEO UPLOAD
 
 elif option == "Upload Video (MP4)":
     video_file = st.file_uploader("Upload a short video", type=["mp4", "avi", "mov"])
-    if video_file:
-        # Save temporary file
-        tfile = open("temp_video.mp4", "wb")
-        tfile.write(video_file.read())
+    if video_file is not None:
+        try:
+            # Save the uploaded video temporarily
+            temp_path = "temp_video.mp4"
+            with open(temp_path, "wb") as f:
+                f.write(video_file.read())
 
-        cap = cv2.VideoCapture("temp_video.mp4")
-        stframe = st.empty()
+            # Try to open with OpenCV
+            cap = cv2.VideoCapture(temp_path)
+            if not cap.isOpened():
+                st.error("❌ Could not open the uploaded video. Please check the format.")
+            else:
+                st.info("🎥 Processing video... please wait.")
+                stframe = st.empty()
+                frame_count = 0
+                success_frames = 0
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            label, conf = predict_disease(frame_rgb)
-            cv2.putText(frame_rgb, f"{label} ({conf*100:.1f}%)", (20, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            stframe.image(frame_rgb, channels="RGB")
-        cap.release()
-        st.success("✅ Video processing complete!")
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+
+                    frame_count += 1
+                    try:
+                        # Convert frame to RGB
+                        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        label, conf = predict_disease(frame_rgb)
+                        success_frames += 1
+
+                        # Overlay label
+                        cv2.putText(frame_rgb,
+                                    f"{label} ({conf*100:.1f}%)",
+                                    (20, 40),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    1, (0, 255, 0), 2)
+
+                        stframe.image(frame_rgb, channels="RGB")
+
+                    except Exception as frame_err:
+                        st.warning(f"⚠️ Error processing frame {frame_count}: {frame_err}")
+                        continue
+
+                cap.release()
+                if success_frames == 0:
+                    st.error("⚠️ No valid frames were processed.")
+                else:
+                    st.success(f"✅ Finished processing {success_frames} frames.")
+
+        except Exception as e:
+            st.error(f"❌ Error reading or processing the uploaded video: {e}")
+        finally:
+            # Cleanup temporary file
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except Exception:
+                pass
 
 # FOOTER
 
@@ -102,6 +155,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
