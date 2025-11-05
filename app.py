@@ -38,7 +38,8 @@ st.write("Upload or capture an image to identify crop diseases using MobileNetV2
 # ============================================================
 
 IMG_SIZE = (128, 128)
-CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']  # update as per your dataset
+CLASS_NAMES = ['Blight', 'Common Rust', 'Gray Leaf Spot', 'Healthy']    # update as per your dataset
+ 
 
 def predict_disease(frame):
     """
@@ -187,6 +188,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
