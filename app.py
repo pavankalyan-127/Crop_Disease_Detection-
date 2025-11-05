@@ -34,37 +34,37 @@ st.title(" 🌾Crop Disease Detection (Mobile + Camera Ready)")
 st.write("Upload or capture an image to identify crop diseases using MobileNetV2 model.")
 
 # ============================================================
-# 🔮 PREDICTION FUNCTION + GLOBAL CONFIG
+# 🔮 PREDICTION FUNCTION (Fixed for Colab-trained model)
 # ============================================================
 
-# Must match your model’s training image size
 IMG_SIZE = (224, 224)
-
-# Update class names to exactly match your dataset folders
-CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']
+CLASS_NAMES = ['Healthy', 'Blight', 'Common Rust', 'Gray Leaf Spot']  # update as per your dataset
 
 def predict_disease(frame):
     """
-    Takes an OpenCV frame or image array and returns predicted class and confidence.
+    Ensure image preprocessing matches Colab training exactly.
     """
     try:
-        # Resize and normalize image
+        # Convert to RGB (in case it's BGR from OpenCV)
+        if frame.shape[-1] == 3:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # Resize & normalize
         img = cv2.resize(frame, IMG_SIZE)
-        img = img_to_array(img) / 255.0
+        img = img.astype('float32') / 255.0  # match ImageDataGenerator(rescale=1./255)
         img = np.expand_dims(img, axis=0)
 
-        # Make prediction
         preds = model.predict(img)
-        label_index = np.argmax(preds)
-        label = CLASS_NAMES[label_index]
+        label = CLASS_NAMES[np.argmax(preds)]
         conf = float(np.max(preds))
 
         return label, conf
 
     except Exception as e:
-        # Handle any unexpected issues (wrong image shape, etc.)
         st.error(f"⚠️ Prediction error: {e}")
         return "Unknown", 0.0
+
+
 
 # USER INPUT SELECTION
 
@@ -187,6 +187,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
