@@ -17,7 +17,7 @@ from PIL import Image
 # ============================================================
 # 🧠 LOAD MODEL (NO STREAMLIT DECORATORS ABOVE CONFIG)
 # ============================================================
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab1.h5")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab.h5")
 
 def load_cnn_model():
     """Loads the trained CNN model."""
@@ -187,6 +187,7 @@ st.markdown("---")
 st.markdown(
     "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
 )
+
 
 
 
