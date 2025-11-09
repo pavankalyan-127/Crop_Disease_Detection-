@@ -1,139 +1,135 @@
-# ============================================================
-#  STREAMLIT CONFIG - MUST BE FIRST
-# ============================================================
-import streamlit as st
-st.set_page_config(page_title="🌾 Crop Disease Detector", layout="centered")
+# =========================================================
+# 🚗 DETR Self-Driving Object Detection Dashboard (Final)
+# =========================================================
 
-# ============================================================
-#  LIBRARY IMPORTS
-# ============================================================
 import os
-import tensorflow as tf
-import numpy as np
-import cv2
-from tensorflow.keras.preprocessing.image import img_to_array
-from PIL import Image
-
-# ============================================================
-# 🧠 LOAD MODEL (NO STREAMLIT DECORATORS ABOVE CONFIG)
-# ============================================================
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab.h5")
-
-def load_cnn_model():
-    """Loads the trained CNN model."""
-    model = tf.keras.models.load_model(MODEL_PATH)
-    return model
-
-#  use Streamlit’s caching *after* config has been set
-model = st.cache_resource(load_cnn_model)()
-
-# ============================================================
-#  STREAMLIT UI START
-# ============================================================
-st.title(" 🌾Crop Disease Detection (Mobile + Camera Ready)")
-st.write("Upload or capture an image to identify crop diseases using MobileNetV2 model.")
-
-# ============================================================
-# 🔮 PREDICTION FUNCTION (Fixed for Colab-trained model)
-# ============================================================
-
-IMG_SIZE = (128, 128)
-CLASS_NAMES = ['Blight', 'Common Rust', 'Gray Leaf Spot', 'Healthy']    # update as per your dataset
- 
-
-def predict_disease(frame):
-    """
-    Ensure image preprocessing matches Colab training exactly.
-    """
-    try:
-        # Convert to RGB (in case it's BGR from OpenCV)
-        if frame.shape[-1] == 3:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Resize & normalize
-        img = cv2.resize(frame, IMG_SIZE)
-        img = img.astype('float32') / 255.0  # match ImageDataGenerator(rescale=1./255)
-        img = np.expand_dims(img, axis=0)
-
-        preds = model.predict(img)
-        label = CLASS_NAMES[np.argmax(preds)]
-        conf = float(np.max(preds))
-
-        return label, conf
-
-    except Exception as e:
-        st.error(f"⚠️ Prediction error: {e}")
-        return "Unknown", 0.0
-
-
-
-# USER INPUT SELECTION
-
-# ---------- USER INPUT SELECTION ----------
+import time
 import uuid
-import os
+import torch
+import streamlit as st
+from PIL import Image, ImageDraw
+from transformers import DetrForObjectDetection, DetrImageProcessor
+import cv2
+import tempfile
+import numpy as np
+
+# =========================================================
+# STREAMLIT CONFIG
+# =========================================================
+st.set_page_config(page_title="🚗 Self-Driving Object Detection", layout="wide")
+st.title("🚘 DETR — Self-Driving Object Detection Dashboard")
+
+# =========================================================
+# MODEL CONFIGURATION
+# =========================================================
+MODEL_PATH = "pavankalyan123456/selfdriving-detr"  # your Hugging Face model repo
+
+# =========================================================
+# LOAD MODEL + PROCESSOR
+# =========================================================
+@st.cache_resource
+def load_model():
+    st.info("⏳ Loading DETR model from Hugging Face Hub...")
+    model = DetrForObjectDetection.from_pretrained(MODE_PATH)
+    processor = DetrImageProcessor.from_pretrained(MODE_PATH)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
+    st.success(f"✅ Model loaded successfully on **{device.upper()}**")
+    return model, processor, device
+
+model, processor, device = load_model()
+
+# =========================================================
+# DETECTION FUNCTION
+# =========================================================
+def detect_objects(image: Image.Image):
+    """Run DETR object detection and draw boxes."""
+    inputs = processor(images=image, return_tensors="pt").to(device)
+    outputs = model(**inputs)
+    target_sizes = torch.tensor([image.size[::-1]]).to(device)
+    results = processor.post_process_object_detection(
+        outputs, target_sizes=target_sizes, threshold=0.6
+    )[0]
+
+    draw = ImageDraw.Draw(image)
+    for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
+        box = [round(i, 2) for i in box.tolist()]
+        draw.rectangle(box, outline="lime", width=3)
+        draw.text(
+            (box[0], box[1]),
+            f"{model.config.id2label[label.item()]}: {round(score.item(), 2)}",
+            fill="white",
+        )
+    return image
+
+
+# =========================================================
+# 📸 INPUT SELECTION (Camera / Image / Video)
+# =========================================================
+st.header("📸 Choose Input Source")
 
 option = st.radio(
-    "📸 Select Input Type:",
+    "Select Input Type:",
     ["Capture from Camera", "Upload Image", "Upload Video (MP4)"],
-    index=0
+    index=1
 )
 
-# ---------- 1) CAMERA INPUT ----------
+# =========================================================
+# 1️⃣ CAMERA INPUT (Mobile/Webcam)
+# =========================================================
 if option == "Capture from Camera":
-    st.info("Use your mobile or webcam to capture an image.")
-    # unique static key for camera widget
-    img_file = st.camera_input("Take a photo", key="camera_input_1")
+    st.info("Use your webcam or phone camera to capture an image.")
+    camera_image = st.camera_input("Take a photo", key="selfdriving_cam")
 
-    if img_file is not None:
+    if camera_image is not None:
         try:
-            image = Image.open(img_file).convert("RGB")
-            # show image (no use_container_width)
-            st.image(image, caption="Captured Leaf")
-            frame = np.array(image)
-
-            label, conf = predict_disease(frame)
-            st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
-
+            image = Image.open(camera_image).convert("RGB")
+            st.image(image, caption="Captured Frame", use_container_width=True)
+            with st.spinner("Detecting objects..."):
+                output_img = detect_objects(image)
+                st.image(output_img, caption="Detections", use_container_width=True)
+                st.success("✅ Detection Complete!")
         except Exception as e:
-            st.error(f"❌ Error processing captured image: {e}")
+            st.error(f"❌ Error processing camera image: {e}")
 
-
-# ---------- 2) IMAGE UPLOAD ----------
+# =========================================================
+# 2️⃣ IMAGE UPLOAD
+# =========================================================
 elif option == "Upload Image":
-    uploaded = st.file_uploader("Upload leaf image...", type=["jpg", "jpeg", "png"], key="upload_image_1")
-    if uploaded is not None:
+    image_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"], key="upload_image_2")
+    if image_file is not None:
         try:
-            image = Image.open(uploaded).convert("RGB")
-            st.image(image, caption="Uploaded Leaf")
-            frame = np.array(image)
-
-            label, conf = predict_disease(frame)
-            st.success(f"Prediction: **{label}** ({conf*100:.2f}%)")
-
+            img = Image.open(image_file).convert("RGB")
+            st.image(img, caption="Uploaded Image", use_container_width=True)
+            with st.spinner("Detecting objects..."):
+                output_img = detect_objects(img)
+                st.image(output_img, caption="Detections", use_container_width=True)
+                st.success("✅ Detection Complete!")
         except Exception as e:
             st.error(f"❌ Error processing uploaded image: {e}")
 
-
-# ---------- 3) VIDEO UPLOAD ----------
+# =========================================================
+# 3️⃣ VIDEO UPLOAD (LIVE-STYLE DETECTION)
+# =========================================================
 elif option == "Upload Video (MP4)":
-    video_file = st.file_uploader("Upload a short video", type=["mp4", "avi", "mov"], key="upload_video_1")
+    video_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"], key="upload_video_2")
+
     if video_file is not None:
         temp_uuid = str(uuid.uuid4())[:8]
-        temp_path = f"temp_video_{temp_uuid}.mp4"
+        temp_path = f"temp_selfdriving_{temp_uuid}.mp4"
         try:
-            # save upload to a unique temp file
             with open(temp_path, "wb") as f:
                 f.write(video_file.read())
 
             cap = cv2.VideoCapture(temp_path)
             if not cap.isOpened():
-                st.error("❌ Could not open the uploaded video. Please check the format.")
+                st.error("❌ Could not open uploaded video.")
             else:
-                st.info("🎥 Processing video... please wait.")
+                st.info("🎥 Processing video... showing detections live.")
                 stframe = st.empty()
                 frame_count = 0
                 success_frames = 0
+                start_time = time.time()
 
                 while True:
                     ret, frame = cap.read()
@@ -141,40 +137,31 @@ elif option == "Upload Video (MP4)":
                         break
 
                     frame_count += 1
+                    if frame_count % 3 != 0:  # skip frames to improve speed
+                        continue
+
                     try:
-                        # Convert frame to RGB safely
                         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        image_pil = Image.fromarray(frame_rgb)
+                        output_img = detect_objects(image_pil)
 
-                        # predict on resized frame inside predict_disease (assumes it resizes)
-                        label, conf = predict_disease(frame_rgb)
+                        # Convert to displayable frame
+                        display_frame = np.array(output_img)
+                        stframe.image(display_frame, caption=f"Frame {frame_count}", use_container_width=True)
+
                         success_frames += 1
-
-                        # overlay label on the rgb frame (we convert back to BGR for cv2.putText then show RGB)
-                        display_frame = frame_rgb.copy()
-                        cv2.putText(display_frame,
-                                    f"{label} ({conf*100:.1f}%)",
-                                    (20, 40),
-                                    cv2.FONT_HERSHEY_SIMPLEX,
-                                    1, (0, 255, 0), 2)
-
-                        # Streamlit expects RGB when channels="RGB"
-                        stframe.image(display_frame, channels="RGB")
-
+                        time.sleep(0.05)  # simulate live FPS (~20 FPS)
                     except Exception as frame_err:
-                        st.warning(f"⚠️ Error processing frame {frame_count}: {frame_err}")
+                        st.warning(f"⚠️ Error at frame {frame_count}: {frame_err}")
                         continue
 
                 cap.release()
-                if success_frames == 0:
-                    st.error("⚠️ No valid frames were processed.")
-                else:
-                    st.success(f"✅ Finished processing {success_frames} frames.")
+                fps = success_frames / (time.time() - start_time)
+                st.success(f"✅ Finished processing {success_frames} frames. Avg FPS: {fps:.2f}")
 
         except Exception as e:
-            st.error(f"❌ Error reading or processing the uploaded video: {e}")
-
+            st.error(f"❌ Error reading or processing uploaded video: {e}")
         finally:
-            # cleanup temp file
             try:
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
@@ -182,28 +169,8 @@ elif option == "Upload Video (MP4)":
                 pass
 
 
+# =========================================================
 # FOOTER
-
+# =========================================================
 st.markdown("---")
-st.markdown(
-    "📱 **Tip:** Works on mobile browsers. Open this app via local Wi-Fi IP to test live capture."
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+st.caption("🚀 Built with Hugging Face DETR + Streamlit by Pavan Kalyan")
