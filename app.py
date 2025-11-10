@@ -21,7 +21,7 @@ st.markdown("Upload an image or video of a leaf to detect the disease.")
 
 @st.cache_resource
 def load_cnn_model():
-    MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab.h5")  # or .keras
+    MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobile_corn_model_colab1.h5")  # or .keras
     model = load_model(MODEL_PATH)
     return model
 
@@ -135,6 +135,7 @@ elif option == "Upload Video (MP4)":
 # ============================================================
 st.markdown("---")
 st.markdown("👨‍💻 Developed by **Pavan Kalyan** | Model: CNN (MobileNetV2 trained in Colab)")
+
 
 
 
