@@ -32,7 +32,7 @@ st.success("✅ Model loaded successfully!")
 # 🔮 Prediction Function
 # ============================================================
 
-IMG_SIZE = (244, 244)
+IMG_SIZE = (224, 224)
 CLASS_NAMES = ['Blight', 'Common Rust', 'Gray Leaf Spot', 'Healthy']  # match your training order
 
 def predict_disease(frame):
@@ -135,6 +135,7 @@ elif option == "Upload Video (MP4)":
 # ============================================================
 st.markdown("---")
 st.markdown("👨‍💻 Developed by **Pavan Kalyan** | Model: CNN (MobileNetV2 trained in Colab)")
+
 
 
 
