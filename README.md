@@ -1,42 +1,44 @@
-Crop Disease Detection using Deep Learning (Mobile-Ready)
-1.Overview :
+#  Corn Crop Disease Detection Using CNN & Transfer Learning
 
-This project detects crop leaf diseases using deep learning (CNN / MobileNetV2).
-It provides a web-based interface built with Streamlit that works seamlessly on mobile devices and desktops.
-Users can upload images, record directly from their camera, or upload videos to get real-time predictions of crop health.
+This project focuses on building a deep learning model to classify corn (maize) leaf diseases using image-based analysis. Early detection of crop diseases is crucial for preventing yield loss, improving productivity, and supporting farmers with automated diagnostic tools.
 
-2.Features:
+The model classifies **4 corn leaf categories**:
 
-Trained using MobileNetV2 / VGG16 / ResNet50 architectures.
-Upload or capture leaf images directly from your mobile camera.
-Supports video uploads for continuous leaf health analysis.
-Deployable on Streamlit Cloud for global access.
-Optimized for fast inference on mobile and web.
+- **Gray Leaf Spot**
+- **Healthy**
+- **Blight**
+- **Common Rust**
 
-3.Technologies Used:
+This project includes a full pipeline: dataset preparation, CNN & Transfer Learning training, model evaluation, and a Streamlit-based interactive UI for real-time predictions.
 
-Python 3.x
-TensorFlow / Keras
-OpenCV
-NumPy & Pillow
-Streamlit
+## Features
 
-4.Dataset:
-The model was trained on a Corn Leaf Disease dataset, containing images of:
-Healthy Leaves
-Blight
-Common Rust
-Gray Leaf Spot
-NOTE:(You can replace with your own dataset path or Kaggle source.)
+- ✔️ Classifies 4 major corn leaf diseases  
+- ✔️ High accuracy using **CNN + Transfer Learning (MobileNet/VGG16)**  
+- ✔️ Real-time image upload & webcam support  
+- ✔️ Streamlit UI  
+- ✔️ Preprocessing pipeline for agricultural datasets  
+- ✔️ Lightweight model suitable for edge deployment 
 
-STEPS TO IMPLEMENT:
-1.Clone this repository:
-git clone https://github.com/pavankalyan-127/Crop_Disease_Detection-.git
-cd Crop_Disease_Detection-
-2.nstall dependencies:
-pip install -r requirements.txt
-3.Run the Streamlit app:
-streamlit run app.py
-4.Open in your browser:
-http://localhost:8501
+## Model Architecture
+
+The model was trained using:
+
+- **Custom CNN layers**
+- **Transfer Learning (VGG16 / MobileNetV2)**
+- **Fine-tuning last layers**
+- **Softmax classification (4 classes)**
+Key steps:
+1. Image resizing & normalization  
+2. Augmentation (rotation, flip, zoom)  
+3. Feature extraction using pretrained CNN  
+4. Fully connected classifier  
+5. Cross-entropy training  
+
+
+
+
+
+
+
 
