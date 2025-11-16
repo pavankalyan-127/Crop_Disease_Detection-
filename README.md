@@ -33,11 +33,13 @@ Key steps:
 2. Augmentation (rotation, flip, zoom)  
 3. Feature extraction using pretrained CNN  
 4. Fully connected classifier  
-5. Cross-entropy training  
-
+5. Cross-entropy training
+    
+deployment link 
+https://corncropdiseasedetection.streamlit.app/
 
 ![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_1.jpg?raw=true)
 ![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_2.jpg?raw=true)
 ![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_3.jpg?raw=true)
-
+![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_4.jpg?raw=true)
 
