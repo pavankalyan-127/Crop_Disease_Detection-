@@ -38,7 +38,7 @@ Key steps:
 
 ![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_1.jpg?raw=true)
 
-
+![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_2.jpg?raw=true)
 
 
 
