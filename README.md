@@ -36,7 +36,7 @@ Key steps:
 5. Cross-entropy training  
 
 
-
+![image alt](https://github.com/pavankalyan-127/Crop_Disease_Detection-/blob/main/corn_1.jpg?raw=true)
 
 
 
