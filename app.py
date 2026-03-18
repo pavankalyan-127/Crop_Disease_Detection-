@@ -42,10 +42,8 @@ CLASS_NAMES = ['Blight', 'Common_Rust', 'Gray_Leaf_Spot', 'Healthy']
 
 def predict_disease(frame):
     try:
-        # 🔥 IMPORTANT: No color conversion here
-
         img = cv2.resize(frame, IMG_SIZE)
-        img = preprocess_input(img)   # MobileNetV2 preprocessing
+        img = img.astype('float32') / 255.0   # ✅ match training
         img = np.expand_dims(img, axis=0)
 
         preds = model.predict(img, verbose=0)
