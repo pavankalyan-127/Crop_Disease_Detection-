@@ -33,7 +33,7 @@ st.success("✅ Model loaded successfully!")
 # ============================================================
 
 IMG_SIZE = (224, 224)
-CLASS_NAMES = ['Blight', 'Common Rust', 'Gray Leaf Spot', 'Healthy']  # match your training order
+CLASS_NAMES = ['Blight', 'Common_Rust', 'Gray_Leaf_Spot', 'Healthy']  # match your training order
 
 def predict_disease(frame):
     """
